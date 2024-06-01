@@ -26,7 +26,7 @@ pipelineJob('pipeline') {
                     sh 'whoami'
                     sh 'echo "${USER}"'
                     sh 'echo "${PASSWORD}"'
-                    sh 'docker login --username "samarmatoussi" --password "Simran12456789" registry.github.com'
+                    sh 'docker login --username "${USER}" --password "${PASSWORD}" registry.github.com'
             }
                     sh 'echo "building and pushing images to the container registry"'
             }
