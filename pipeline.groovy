@@ -2,33 +2,45 @@ pipelineJob('pipeline') {
   definition {
     cps {
       script(
-'''pipeline{
-    agent{
-            docker { image 'pipeline/jenkins'
-                        args '-u 0:0 -v /var/run/docker.sock:/var/run/docker.sock'}}
-    stages{
-        stage('git'){
-            steps{
-                echo 'cloning the repository'
-                git branch: 'master', credentialsId: 'github-credentials', url: 'https://github.com/SamarMatoussi/JCasC.git' 
+'''pipeline {
+    agent {
+        docker {
+            image 'pipeline/jenkins'
+            args '-u 0:0 -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    environment {
+        registry = "SamarMatoussi/JCasC"
+        registryCredential = 'dockerHub'
+        dockerImage = ""
+    }                    
+    stages {
+        stage('git') {
+            steps {
+                echo 'Cloning the repository'
+                git branch: 'master', credentialsId: 'github-credentials', url: 'https://github.com/SamarMatoussi/JCasC.git'
                 sh 'docker run hello-world'
             }
         }
-        stage('unit_test'){
-            steps{
-                sh 'echo "start the unit test"'
+        stage('unit_test') {
+            steps {
+                sh 'echo "Start the unit test"'
             }
         }
-        stage('build'){
-            steps{
-                sh 'echo "login to the github container registry"'
-                withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'PASSWORD', usernameVariable: 'USER')]) {
-                    sh 'whoami'
-                    sh 'echo "${USER}"'
-                    sh 'echo "${PASSWORD}"'
-                    sh 'docker login --username "${USER}" --password "${PASSWORD}" registry.github.com'
+        stage('Build Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${registry}:$BUILD_NUMBER")
+                }
             }
-                    sh 'echo "building and pushing images to the container registry"'
+        }
+        stage('Deploy Image') {
+            steps {
+                script {
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.push()
+                    }
+                }
             }
         }
     }
