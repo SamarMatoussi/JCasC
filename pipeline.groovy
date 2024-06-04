@@ -10,7 +10,7 @@ pipelineJob('pipeline') {
         }
     }
     environment {
-        registry = "SamarMatoussi/JCasC"
+        registry = "samarmatoussi/jcasc"
         registryCredential = 'dockerHub'
         dockerImage = ""
     }                    
