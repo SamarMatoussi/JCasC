@@ -43,6 +43,16 @@ pipelineJob('pipeline') {
                 }
             }
         }
+     stage('Deploy to Production') {
+            steps {
+                script {
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.pull()
+                        docker.image("${registry}:$BUILD_NUMBER").run()
+                    }
+                }
+            }
+        }    
     }
 }''')
     }
