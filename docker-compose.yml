@@ -10,7 +10,7 @@ services:
       - GITHUB_USERNAME=${ENV_GITHUB_USERNAME}
       - GITHUB_PASSWORD=${ENV_GITHUB_PASSWORD}
     ports:
-      - "8085:8080"
+      - "8084:8080"
       - "50000:50000"
     restart: unless-stopped
     volumes:
