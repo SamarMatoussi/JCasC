@@ -1,57 +1,227 @@
-jenkins:
-  securityRealm:
-    local:
-      allowsSignup: false
-      users:
-       - id: ${JENKINS_ADMIN_ID}
-         password: ${JENKINS_ADMIN_PASSWORD}
-  authorizationStrategy:
-    globalMatrix:
-      permissions:
-        - "Overall/Administer:admin"
-        - "Overall/Read:authenticated"
-  remotingSecurity:
-    enabled: true
-  clouds:
-  - docker: 
-      containerCap: 5
-      dockerApi:
-        connectTimeout: 60
-        dockerHost:
-          uri: "unix://var/run/docker.sock"
-        readTimeout: 60
-      exposeDockerHost: true
-      name: "dind"
-      templates:
-      - connector: "attach"
-        dockerTemplateBase:
-          cpuPeriod: 0
-          cpuQuota: 0
-          image: "pipeline/agent" 
-        instanceCapStr: "10"
-        labelString: "agent" 
-        mode: EXCLUSIVE
-        name: "Jenkins Agent"
-        pullStrategy: PULL_ALWAYS
-        pullTimeout: 300
-        remoteFs: "/home/jenkins/agent"
-security:
-  queueItemAuthenticator:
-    authenticators:
-    - global:
-        strategy: triggeringUsersAuthorizationStrategy
-unclassified:
-  location:
-    url: http://server_ip:8080/
-jobs: 
-  - file: /var/jenkins_home/pipeline.groovy
 credentials:
   system:
     domainCredentials:
     - credentials:
       - usernamePassword:
-          id: "github-credentials"
-          username: ${GITHUB_USERNAME}
-          password: ${GITHUB_PASSWORD}
-          description: "Sample credentials of exampleuser"
+          id: "dockerhub"
+          password: "{AQAAABAAAAAQAsLOIueOM1CQ8ZnZu6ay/yde/BOolMYynBjf8BDXdXc=}"
           scope: GLOBAL
+          username: "samarmatoussi"
+      - usernamePassword:
+          id: "email"
+          password: "{AQAAABAAAAAgO64ackJbwtaFCv9AJtjIa58IDyB6iiT6OH68ARUqJrv8Q0cl0CYX9AZhltD1XIZ9}"
+          scope: GLOBAL
+          username: "matoussi.samar20@gmail.com"
+jenkins:
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  disableRememberMe: false
+  disabledAdministrativeMonitors:
+  - "jenkins.diagnostics.ControllerExecutorsNoAgents"
+  - "hudson.util.DoubleLaunchChecker"
+  - "hudson.diagnosis.ReverseProxySetupMonitor"
+  labelAtoms:
+  - name: "built-in"
+  markupFormatter: "plainText"
+  mode: NORMAL
+  myViewsTabBar: "standard"
+  nodeMonitors:
+  - "architecture"
+  - "clock"
+  - diskSpace:
+      freeSpaceThreshold: "1GiB"
+      freeSpaceWarningThreshold: "2GiB"
+  - "swapSpace"
+  - tmpSpace:
+      freeSpaceThreshold: "1GiB"
+      freeSpaceWarningThreshold: "2GiB"
+  - "responseTime"
+  numExecutors: 2
+  primaryView:
+    all:
+      name: "all"
+  projectNamingStrategy: "standard"
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  securityRealm:
+    local:
+      allowsSignup: false
+      enableCaptcha: false
+      users:
+      - id: "samar"
+        name: "Samar"
+        properties:
+        - "consoleUrlProvider"
+        - "myView"
+        - preferredProvider:
+            providerId: "default"
+        - "theme"
+        - "timezone"
+        - "experimentalFlags"
+        - mailer:
+            emailAddress: "matoussi.samar20@gmail.com"
+        - "apiToken"
+        - "favorite"
+  slaveAgentPort: -1
+  updateCenter:
+    sites:
+    - id: "default"
+      url: "https://updates.jenkins.io/update-center.json"
+  views:
+  - all:
+      name: "all"
+  viewsTabBar: "standard"
+globalCredentialsConfiguration:
+  configuration:
+    providerFilter: "none"
+    typeFilter: "none"
+appearance:
+  pipelineGraphView:
+    showGraphOnBuildPage: false
+    showGraphOnJobPage: false
+  prism:
+    theme: PRISM
+  themeManager:
+    disableUserThemes: false
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  cps:
+    hideSandbox: false
+  gitHooks:
+    allowedOnAgents: false
+    allowedOnController: false
+  gitHostKeyVerificationConfiguration:
+    sshHostKeyVerificationStrategy: "knownHostsFileVerificationStrategy"
+  sSHD:
+    port: -1
+  scriptApproval:
+    forceSandbox: false
+unclassified:
+  SonargraphReport:
+    licenseServerPort: "8080"
+  bitbucketEndpointConfiguration:
+    endpoints:
+    - bitbucketCloudEndpoint:
+        enableCache: false
+        manageHooks: false
+        repositoriesCacheDuration: 0
+        teamCacheDuration: 0
+  buildDiscarders:
+    configuredBuildDiscarders:
+    - "jobBuildDiscarder"
+  buildStepOperation:
+    enabled: false
+  email-ext:
+    addAccounts:
+    - address: "matoussi.samar20@gmail.com"
+      credentialsId: "email"
+      smtpHost: "smtp.gmail.com"
+      smtpPort: "587"
+      useTls: true
+    adminRequiredForTemplateTesting: false
+    allowUnregisteredEnabled: false
+    charset: "UTF-8"
+    debugMode: false
+    defaultBody: |-
+      $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+
+      Check console output at $BUILD_URL to view the results.
+    defaultContentType: "text/plain"
+    defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
+    defaultSuffix: "@gmail.com"
+    defaultTriggerIds:
+    - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
+    mailAccount:
+      smtpHost: "smtp.gmail.com"
+      smtpPort: "587"
+      useTls: true
+    maxAttachmentSize: -1
+    maxAttachmentSizeMb: -1
+    precedenceBulk: false
+    throttlingEnabled: false
+    watchingEnabled: false
+  enrichedSummaryConfig:
+    enrichedSummaryEnabled: false
+    httpClientDelayBetweenRetriesInSeconds: 1
+    httpClientMaxRetries: 3
+    httpClientTimeoutInSeconds: 1
+  fingerprints:
+    fingerprintCleanupDisabled: false
+    storage: "file"
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+  gitHubPluginConfig:
+    hookUrl: "http://10.0.2.15:8084/github-webhook/"
+  globalTimeOutConfiguration:
+    operations:
+    - "abortOperation"
+    overwriteable: false
+  injectionConfig:
+    allowUntrusted: false
+    checkForBuildAgentErrors: false
+    enabled: false
+    enforceUrl: false
+    gradleCaptureTaskInputFiles: true
+    injectCcudExtension: false
+    injectMavenExtension: false
+    mavenCaptureGoalInputFiles: true
+  junitTestResultStorage:
+    storage: "file"
+  location:
+    adminAddress: "l'adresse n'est pas encore configurée <nobody@nowhere>"
+    url: "http://10.0.2.15:8084/"
+  mailer:
+    authentication:
+      password: "{AQAAABAAAAAglf29o3xZQj6mV0st/cjcI0m+sGBmEu1AoEXoauJl66KriOniPerQvj9YM9iCfSPH}"
+      username: "matoussi.samar20@gmail.com"
+    charset: "UTF-8"
+    defaultSuffix: "@gmail.com"
+    replyToAddress: "matoussi.samar20@gmail.com"
+    smtpHost: "smtp.gmail.com"
+    smtpPort: "587"
+    useSsl: false
+    useTls: true
+  mavenModuleSet:
+    localRepository: "default"
+  pollSCM:
+    pollingThreadCount: 10
+  scmGit:
+    addGitTagAction: false
+    allowSecondFetch: false
+    createAccountBasedOnEmail: false
+    disableGitToolChooser: false
+    hideCredentials: false
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: false
+  sonarGlobalConfiguration:
+    buildWrapperEnabled: false
+  timestamper:
+    allPipelines: false
+    elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"
+    systemTimeFormat: "'<b>'HH:mm:ss'</b> '"
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
+  jdk:
+    installations:
+    - home: "/usr/lib/jvm/java-17-openjdk-amd64"
+      name: "JAVA_HOME"
+  maven:
+    installations:
+    - home: "/opt/apache-maven-3.6.3"
+      name: "MAVEN_HOME"
+  mavenGlobalConfig:
+    globalSettingsProvider: "standard"
+    settingsProvider: "standard"
++
