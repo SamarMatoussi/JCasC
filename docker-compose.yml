@@ -18,5 +18,81 @@ services:
       - jenkins-data:/var/jenkins_home
       - ./casc.yaml:/var/jenkins_home/casc.yaml
       - /usr/bin/docker:/usr/bin/docker
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0.33
+    restart: unless-stopped
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql
+    restart: on-failure
+    container_name: atlaslabs-backend
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql_db:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true&useSSL=false&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: "org.hibernate.dialect.MySQLDialect"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    restart: on-failure
+    container_name: atlaslabs-frontend
+    ports:
+      - "4200:80"
+
+  nexus:
+    image: sonatype/nexus3
+    container_name: nexus
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      NEXUS_CONTEXT: "/"
+    volumes:
+      - nexus-data:/nexus-data
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      SONARQUBE_JDBC_URL: "jdbc:mysql://mysql_db:3306/${MYSQL_DATABASE}"
+      SONARQUBE_JDBC_USERNAME: "root"
+      SONARQUBE_JDBC_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      SONARQUBE_ADMIN_PASSWORD: "${SONARQUBE_ADMIN_PASSWORD}"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
 volumes:
-  jenkins-data:
+  mysql_data:
+  jenkins_home:
+  nexus-data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+
