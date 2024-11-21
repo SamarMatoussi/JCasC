@@ -70,21 +70,19 @@ services:
     volumes:
       - nexus-data:/nexus-data
 
-  sonarqube:
-    image: sonarqube:community
-    container_name: sonarqube
-    restart: unless-stopped
-    ports:
-      - "9000:9000"
-    environment:
-      SONARQUBE_JDBC_URL: "jdbc:mysql://mysql_db:3306/${MYSQL_DATABASE}"
-      SONARQUBE_JDBC_USERNAME: "root"
-      SONARQUBE_JDBC_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      SONARQUBE_ADMIN_PASSWORD: "${SONARQUBE_ADMIN_PASSWORD}"
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
+ sonarqube:
+  image: sonarqube:community
+  container_name: sonarqube
+  restart: unless-stopped
+  ports:
+    - "9000:9000"
+  environment:
+    SONARQUBE_ADMIN_PASSWORD: "${SONARQUBE_ADMIN_PASSWORD}"
+  volumes:
+    - sonarqube_data:/opt/sonarqube/data
+    - sonarqube_extensions:/opt/sonarqube/extensions
+    - sonarqube_logs:/opt/sonarqube/logs
+
 
 volumes:
   mysql_data:
